@@ -1,0 +1,10 @@
+CLIProxyAPI_*_windows_amd64/
+CLIProxyAPI_windows_amd64/
+cpa-manager-plus_*_windows_amd64/
+cpa-manager-plus_windows_amd64/
+.downloads/
+LOCAL_CONFIG.generated.txt
+*.log
+*.tmp
+.env
+.env.*
