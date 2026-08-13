@@ -79,6 +79,41 @@ $separatorItem = New-Object System.Windows.Forms.MenuItem
 $separatorItem.Text = "-"
 [void]$menu.MenuItems.Add($separatorItem)
 
+# Restart menu item
+$restartItem = New-Object System.Windows.Forms.MenuItem
+$restartItem.Text = "Restart CPA Services"
+$restartItem.add_Click({
+    # Kill tracked process objects
+    if ($global:proc1 -and -not $global:proc1.HasExited) { $global:proc1.Kill() }
+    if ($global:proc2 -and -not $global:proc2.HasExited) { $global:proc2.Kill() }
+
+    # Force tree kill via cmd for any leftovers/child processes
+    $killCmd = "/c taskkill /F /IM cli-proxy-api.exe /T >nul 2>&1 & taskkill /F /IM cpa-manager-plus.exe /T >nul 2>&1"
+    $psiKill = New-Object System.Diagnostics.ProcessStartInfo
+    $psiKill.FileName = "cmd.exe"
+    $psiKill.Arguments = $killCmd
+    $psiKill.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Hidden
+    $psiKill.CreateNoWindow = $true
+    [System.Diagnostics.Process]::Start($psiKill) | Out-Null
+
+    Start-Sleep -Seconds 2
+
+    # Restart cli-proxy-api.exe
+    if ($null -ne $cliFile) {
+        $global:proc1 = Start-App -exePath $cliFile.FullName -workDir $cliFile.DirectoryName
+    }
+
+    # Restart cpa-manager-plus.exe
+    if ($null -ne $cpaFile) {
+        $global:proc2 = Start-App -exePath $cpaFile.FullName -workDir $cpaFile.DirectoryName
+    }
+
+    # Open browser to confirm successful restart
+    Start-Sleep -Seconds 1
+    Start-Process "http://localhost:18317" -ErrorAction SilentlyContinue
+})
+[void]$menu.MenuItems.Add($restartItem)
+
 # Exit menu item
 $exitItem = New-Object System.Windows.Forms.MenuItem
 $exitItem.Text = "Exit CPA Services"
