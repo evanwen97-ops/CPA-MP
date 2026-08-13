@@ -94,7 +94,8 @@ $restartItem.add_Click({
     $psiKill.Arguments = $killCmd
     $psiKill.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Hidden
     $psiKill.CreateNoWindow = $true
-    [System.Diagnostics.Process]::Start($psiKill) | Out-Null
+    $killProcess = [System.Diagnostics.Process]::Start($psiKill)
+    $killProcess.WaitForExit()
 
     Start-Sleep -Seconds 2
 
